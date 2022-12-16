@@ -15,6 +15,12 @@ In order to load all images (in png and jpg format) from the directory, click th
 
 ![open_doc_button](./assets/icons8-numbers-input-form-48.png)
 
+If you want to add an image to the scrollable view and see the result of the operation, choose this button:
+
+![add_button](./assets/icons8-licence-plate-48.png)
+
 ## Notes
 
 Project is currently in development phase so bugs may occur.
+
+All icons are from [this](https://icons8.com/) website.
