@@ -24,3 +24,13 @@ If you want to add an image to the scrollable view and see the result of the ope
 Project is currently in development phase so bugs may occur.
 
 All icons are from [this](https://icons8.com/) website.
+
+## Links to datasets
+
+1) https://universe.roboflow.com/augmented-startups/vehicle-registration-plates-trudk
+
+2) https://www.kaggle.com/datasets/andrewmvd/car-plate-detection
+
+3) https://paperswithcode.com/datasets?mod=images&task=license-plate-recognition&page=1
+
+4) https://nomeroff.net.ua/
