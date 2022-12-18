@@ -48,14 +48,18 @@ class App:
             self.addToScrollable(f'{dir}/{f}')
 
     def addToScrollable(self, fi=""):
-        if fi != "":
-            self.allImages.append(fi)
-        else:
-            self.allImages.append(self.file)
-        self.allRes.append(1)
-        self.msview = msv.MyScrollableView(self.lff)
-        self.msview.showimages(self.allImages, self.allRes)
-        self.msview.display(0, 0)
+        try:
+            if fi != "":
+                self.allImages.append(fi)
+            else:
+                self.allImages.append(self.file)
+            self.allRes.append(1)
+            self.msview = msv.MyScrollableView(self.lff)
+            self.msview.showimages(self.allImages, self.allRes)
+            self.msview.display(0, 0)
+        except:
+            messagebox.showerror(
+                "Error", "An error has occured while performing operation")
 
     def arrowClick(self, mode):
         if len(self.allImages) > 0:
