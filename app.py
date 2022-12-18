@@ -21,6 +21,7 @@ class App:
         self.allImages = []
         self.allRes = []
         self.current = 0
+        self.size = (400, 300)
 
     def donothing(self):
         pass
@@ -30,10 +31,15 @@ class App:
         self.file = filedialog.askopenfilename(title="Open file", filetypes=[
             ("PNG files", "*.png"),
             ("JPG files", "*.jpg")])
-        self.img = ImageTk.PhotoImage(
-            Image.open(self.file).resize((400, 300)))
-        self.mainImg = Label(self.mff, image=self.img, bg="white")
-        self.mainImg.grid(row=0, column=0)
+        try:
+            im = Image.open(self.file)
+            im.thumbnail(self.size, Image.Resampling.LANCZOS)
+            self.img = ImageTk.PhotoImage(im)
+            self.mainImg = Label(self.mff, image=self.img, bg="white")
+            self.mainImg.grid(row=0, column=0)
+        except:
+            messagebox.showerror(
+                "Error", "An error has occured while opening the file")
 
     def loadfilesfromdir(self):
         dir = filedialog.askdirectory()
@@ -61,8 +67,9 @@ class App:
                 self.current += 1
                 if self.current >= len(self.allImages):
                     self.current = 0
-            self.img = ImageTk.PhotoImage(
-                Image.open(self.allImages[self.current]).resize((400, 300)))
+            im = Image.open(self.allImages[self.current])
+            im.thumbnail(self.size, Image.Resampling.LANCZOS)
+            self.img = ImageTk.PhotoImage(im)
             self.mainImg = Label(self.mff, image=self.img, bg="white")
             self.mainImg.grid(row=0, column=0)
         else:
@@ -70,16 +77,16 @@ class App:
 
     def draw(self):
         m = mn.MyMenu(self.root)
-        m.submenu("File", ["A", "B", "C"], [
-                  self.donothing, self.donothing, self.donothing])
+        m.submenu("File", ["Open file", "Export to CSV", "Load from directory"], [
+                  self.openfile, self.donothing, self.loadfilesfromdir])
         m.submenu("Info", ["About", "Help"], [lambda: messagebox.showinfo(
-            "Authors", "Ignacy\nKacper\nPiotr"), lambda: webbrowser.open("https://github.com/Ignatella/slow-down-or-mandat")])
+            "Authors", "Ignacy\nKacper\nPiotr"), lambda: webbrowser.open("https://github.com/Ignatella/slow-down-or-mandat#readme")])
 
         buttonsFrame = mf.MyFrame(self.root)
         self.frm = buttonsFrame.createframe()
         btnmenu = btm.ButtonsMenu(self.frm)
         btnmenu.createbuttonsmenu(
-            ["./assets/icons8-less-than-48.png", "./assets/icons8-more-than-48.png", "./assets/icons8-open-document-48.png", "./assets/icons8-export-csv-48.png", "./assets/icons8-licence-plate-48.png", "./assets/icons8-numbers-input-form-48.png"], [lambda:self.arrowClick("L"), lambda:self.arrowClick("R"), self.openfile, lambda: print("A"), self.addToScrollable, self.loadfilesfromdir])
+            ["./assets/icons8-less-than-48.png", "./assets/icons8-more-than-48.png", "./assets/icons8-open-document-48.png", "./assets/icons8-export-csv-48.png", "./assets/icons8-licence-plate-48.png", "./assets/icons8-numbers-input-form-48.png"], [lambda:self.arrowClick("L"), lambda:self.arrowClick("R"), self.openfile, lambda: print("CSV export"), self.addToScrollable, self.loadfilesfromdir])
         buttonsFrame.display(0, 0, columnspan=2)
 
         mainFrame = mf.MyFrame(self.root)
