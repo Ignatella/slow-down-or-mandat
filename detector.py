@@ -80,8 +80,8 @@ class PyImageSearchANPR:
 
     def locate_license_plate(self, gray, candidates, clear_border=False):
         # initialize the license plate contour and ROI
-        lp_cnt = None
-        roi = None
+        lp_cnt = []
+        roi = []
 
         # loop over the license plate candidate contours
         for c in candidates:
@@ -95,22 +95,21 @@ class PyImageSearchANPR:
                 # store the license plate contour and extract the
                 # license plate from the grayscale image and then
                 # threshold it
-                lp_cnt = c
+                lp_cnt.append(c)
                 license_plate = gray[y:y + h, x:x + w]
-                roi = cv2.threshold(license_plate, 0, 255,
-                                    cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+                roi.append(cv2.threshold(license_plate, 0, 255,
+                                         cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1])
 
                 # check to see if we should clear any foreground
                 # pixels touching the border of the image
                 # (which typically, not but always, indicates noise)
                 if clear_border:
-                    roi = clear_border(roi)
+                    roi[-1] = clear_border(roi)
                 # display any debugging information and then break
                 # from the loop early since we have found the license
                 # plate region
                 self.debug_imshow("License Plate", license_plate)
-                self.debug_imshow("ROI", roi)
-                break
+                self.debug_imshow("ROI", roi[-1])
 
         # return a 2-tuple of the license plate ROI and the contour
         # associated with it
@@ -127,7 +126,7 @@ class PyImageSearchANPR:
 
     def find_and_ocr(self, image, psm=7, clear_border=False):
         # initialize the license plate text
-        lp_text = None
+        lp_text = []
         # convert the input image to grayscale, locate all candidate
         # license plate regions in the image, and then process the
         # candidates, leaving us with the *actual* license plate
@@ -139,11 +138,12 @@ class PyImageSearchANPR:
             gray, candidates, clear_border=clear_border)
 
         # only OCR the license plate if the license plate ROI is not empty
-        if lp is not None:
-            # OCR the license plate
-            options = self.build_tesseract_options(psm=psm)
-            lp_text = pytesseract.image_to_string(lp, config=options)
-            self.debug_imshow("License Plate", lp)
+        for l in lp:
+            if l is not None:
+                # OCR the license plate
+                options = self.build_tesseract_options(psm=psm)
+                lp_text.append(pytesseract.image_to_string(l, config=options))
+                self.debug_imshow("License Plate", l)
         # return a 2-tuple of the OCR license plate text along with
         # the contour associated with the license plate region
         return lp_text, lp_cnt
@@ -161,23 +161,33 @@ def perform_detection(imagePath):
 
     image = cv2.imread(imagePath)
     image = imutils.resize(image, width=600)
+    res = []
 
     # apply automatic license plate recognition
-    (lpText, lpCnt) = anpr.find_and_ocr(image)
+    (lpT, lpC) = anpr.find_and_ocr(image)
     # only continue if the license plate was successfully OCR'd
-    if lpText is not None and lpCnt is not None:
-        # fit a rotated bounding box to the license plate contour and
-        # draw the bounding box on the license plate
-        box = cv2.boxPoints(cv2.minAreaRect(lpCnt))
-        box = box.astype("int")
-        cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
-        # compute a normal (unrotated) bounding box for the license
-        # plate and then draw the OCR license plate text on the
-        # image
-        (x, y, w, h) = cv2.boundingRect(lpCnt)
-        cv2.putText(image, cleanup_text(lpText), (x, y - 15),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
-        # show the output ANPR image
-        if lpText != None:
-            lpText = sub('[^A-Za-z0-9]+', '', lpText)
-        return lpText
+    if len(lpT) != len(lpC):
+        raise Exception(
+            "Numbers don\'t match")
+    for i in range(len(lpT)):
+        lpText = lpT[i]
+        lpCnt = lpC[i]
+        if lpText is not None and lpCnt is not None:
+            # fit a rotated bounding box to the license plate contour and
+            # draw the bounding box on the license plate
+            box = cv2.boxPoints(cv2.minAreaRect(lpCnt))
+            box = box.astype("int")
+            cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
+            # compute a normal (unrotated) bounding box for the license
+            # plate and then draw the OCR license plate text on the
+            # image
+            (x, y, w, h) = cv2.boundingRect(lpCnt)
+            cv2.putText(image, cleanup_text(lpText), (x, y - 15),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+            # show the output ANPR image
+            if lpText != None:
+                lpText = sub('[^A-Za-z0-9]+', '', lpText)
+            else:
+                lpText = 'ERR'
+            res.append(lpText)
+    return res[0] if len(res) > 0 else 'ERR'
