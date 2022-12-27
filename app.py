@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 
 import os
 import webbrowser
+import detector
 
 import mymenu as mn
 import myframe as mf
@@ -51,9 +52,12 @@ class App:
         try:
             if fi != "":
                 self.allImages.append(fi)
+                res = detector.perform_detection(fi)
+                self.allRes.append(res)
             else:
                 self.allImages.append(self.file)
-            self.allRes.append(1)
+                res = detector.perform_detection(self.file)
+                self.allRes.append(res)
             self.msview = msv.MyScrollableView(self.lff)
             self.msview.showimages(self.allImages, self.allRes)
             self.msview.display(0, 0)
