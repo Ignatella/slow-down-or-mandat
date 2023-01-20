@@ -21,7 +21,7 @@ class App(ctk.CTk):
         self.title("Slow down or mandat - AO")
         self.geometry(f"{800}x{600}")
         self.all_images = []
-        self.all_res = []
+        self.all_res = {}
         self.current = 0
         self.size = (400, 300)
 
@@ -34,6 +34,11 @@ class App(ctk.CTk):
         self.main_img = ctk.CTkLabel(self, text=None, image=self.img)
         self.main_img.grid(row=1, column=1)
 
+    def setRes(self,value):
+        self.main_img_result.grid_forget()
+        self.main_img_result = ctk.CTkLabel(self, text=value)
+        self.main_img_result.grid(row=2, column=1)
+
     def openfile(self):
         self.main_img.grid_forget()
         self.file = filedialog.askopenfilename(title="Open file", filetypes=[
@@ -42,9 +47,9 @@ class App(ctk.CTk):
         try:
             self.setImage(self.file)
         except Exception as e:
-            print(e)
-            messagebox.showerror(
-                "Error", "An error has occured while opening the file")
+            if len(self.file) != 0:
+                messagebox.showerror(
+                    "Error", "An error has occured while opening the file")
 
     def loadfilesfromdir(self):
         dir = filedialog.askdirectory()
@@ -53,17 +58,37 @@ class App(ctk.CTk):
             f_path = f'{dir}/{f}'
             self.all_images.append(f_path)
             res = detector.perform_detection(f_path)
-            self.scrollbar_list.add_image(self.setImage, f_path, res)
+            self.all_res[f_path] = res
+            self.scrollbar_list.add_image(
+                self.setImage, os.path.basename(f_path), res)
 
     def addToScrollbar(self):
         fi = self.file
         try:
             res = detector.perform_detection(fi)
             self.all_images.append(fi)
-            self.scrollbar_list.add_image(self.setImage, fi, res)
+            self.all_res[fi] = res
+            self.scrollbar_list.add_image(
+                self.setImage, os.path.basename(fi), res)
+            self.setRes(res)
         except:
             messagebox.showerror(
                 "Error", "An error has occured while performing operation")
+
+    def removeFromScrollbar(self):
+        self.all_images = []
+        self.all_res = {}
+
+        self.scrollbar_list.grid_forget()
+        self.scrollbar_list = ScrollbarList(self, width=20)
+        self.scrollbar_list.grid(
+            row=0, column=2, rowspan=3, sticky="nwse")
+
+        self.main_img.grid_forget()
+        self.main_img = ctk.CTkLabel(self, text="Main image")
+        self.main_img.grid(row=1, column=1)
+
+        self.setRes("")
 
     def arrowClick(self, mode):
         if len(self.all_images) > 0:
@@ -76,12 +101,12 @@ class App(ctk.CTk):
                 if self.current >= len(self.all_images):
                     self.current = 0
             self.setImage(self.all_images[self.current])
+            self.setRes(self.all_res[self.all_images[self.current]])
         else:
             messagebox.showerror("Error", "No images loaded")
 
     def draw(self):
         # grid layout settings
-        # self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=7)
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)
@@ -94,9 +119,12 @@ class App(ctk.CTk):
         self.main_img = ctk.CTkLabel(self, text="Main image")
         self.main_img.grid(row=1, column=1)
 
+        self.main_img_result = ctk.CTkLabel(self, text="")
+        self.main_img_result.grid(row=2, column=1)
+
         self.image_navigation = ImageNavigation(
             self, self, fg_color="transparent")
-        self.image_navigation.grid(row=2, column=1)
+        self.image_navigation.grid(row=3, column=1)
 
         # scrollbar list
         self.scrollbar_list = ScrollbarList(self, width=20)

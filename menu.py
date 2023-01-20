@@ -23,9 +23,12 @@ class Menu(ctk.CTkFrame):
         self.menu_button_4 = MenuItem(self, text="Add to scrollbar", light_image="./assets/icons8-licence-plate-48.png",
                                       dark_image="./assets/icons8-licence-plate-48.png", command=self.root.addToScrollbar, fg_color="transparent")
         self.menu_button_4.grid(row=4, column=0, sticky="ew")
+        self.menu_button_5 = MenuItem(self, text="Remove from scrollbar", light_image="./assets/icons8-licence-plate-48.png",
+                                      dark_image="./assets/icons8-licence-plate-48.png", command=self.root.removeFromScrollbar, fg_color="transparent")
+        self.menu_button_5.grid(row=5, column=0, sticky="ew")
         self.appearance_mode_label = ctk.CTkLabel(
             self, text="Appearance Mode:", anchor="w")
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
+        self.appearance_mode_label.grid(row=6, column=0, padx=20, pady=(10, 0))
         self.appearance_mode_optionmenu = ctk.CTkOptionMenu(
             self, values=["Light", "Dark"], command=self.change_appearance_mode_event)
         self.appearance_mode_optionmenu.grid(
