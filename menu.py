@@ -15,7 +15,7 @@ class Menu(ctk.CTkFrame):
                                       dark_image="./assets/icons8-open-document-dark-mode-48.png", command=self.root.openfile, fg_color="transparent")
         self.menu_button_1.grid(row=1, column=0, sticky="ew")
         self.menu_button_2 = MenuItem(self, text="Export to CSV", light_image="./assets/icons8-export-csv-48.png",
-                                      dark_image="./assets/icons8-export-csv-dark-mode-48.png", command=None, fg_color="transparent")
+                                      dark_image="./assets/icons8-export-csv-dark-mode-48.png", command=self.root.export_to_csv, fg_color="transparent")
         self.menu_button_2.grid(row=2, column=0, sticky="ew")
         self.menu_button_3 = MenuItem(self, text="Load from directory", light_image="./assets/icons8-numbers-input-form-48.png",
                                       dark_image="./assets/icons8-numbers-input-form-dark-mode-48.png", command=self.root.loadfilesfromdir, fg_color="transparent")

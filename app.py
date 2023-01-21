@@ -10,6 +10,7 @@ from PIL import Image, ImageTk
 from menu import Menu
 from scrollbarlist import ScrollbarList
 from imagenavigation import ImageNavigation
+import csv
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -104,6 +105,16 @@ class App(ctk.CTk):
             self.setRes(self.all_res[self.all_images[self.current]])
         else:
             messagebox.showerror("Error", "No images loaded")
+
+    def export_to_csv(self):
+        filename = filedialog.asksaveasfilename(filetypes=[("Plik csv", "*.csv")], defaultextension = "*.csv")
+        if filename:
+            with open(filename, "w", newline="") as file:
+                writer = csv.writer(file)
+                header = ("image", "result")
+                writer.writerow(header)
+                for row in self.all_res.items():
+                    writer.writerow(row)
 
     def draw(self):
         # grid layout settings
