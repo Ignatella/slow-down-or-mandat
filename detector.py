@@ -137,6 +137,7 @@ class PyImageSearchANPR:
         (lp, lp_cnt) = self.locate_license_plate(
             255-gray, candidates, clear_border=clear_border)
 
+
         # only OCR the license plate if the license plate ROI is not empty
         for l in lp:
             if l is not None:
