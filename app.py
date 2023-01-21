@@ -66,12 +66,13 @@ class App(ctk.CTk):
     def addToScrollbar(self):
         fi = self.file
         try:
-            res = detector.perform_detection(fi)
-            self.all_images.append(fi)
-            self.all_res[fi] = res
-            self.scrollbar_list.add_image(
-                self.setImage, os.path.basename(fi), res)
-            self.setRes(res)
+            if fi not in self.all_images:
+                res = detector.perform_detection(fi)
+                self.all_images.append(fi)
+                self.all_res[fi] = res
+                self.scrollbar_list.add_image(
+                    self.setImage, os.path.basename(fi), res)
+                self.setRes(res)
         except:
             messagebox.showerror(
                 "Error", "An error has occured while performing operation")
