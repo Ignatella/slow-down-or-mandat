@@ -1,4 +1,3 @@
-import tkinter as tk
 import customtkinter as ctk
 import os
 
@@ -6,7 +5,7 @@ import detector
 
 from tkinter import filedialog
 from tkinter import messagebox
-from PIL import Image, ImageTk
+from PIL import Image
 from menu import Menu
 from scrollbarlist import ScrollbarList
 from imagenavigation import ImageNavigation
@@ -14,6 +13,7 @@ import csv
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
+
 
 
 class App(ctk.CTk):
@@ -34,6 +34,8 @@ class App(ctk.CTk):
             self.main_img.grid_forget()
         self.main_img = ctk.CTkLabel(self, text=None, image=self.img)
         self.main_img.grid(row=1, column=1)
+        self.setRes(self.all_res.get(path,""))
+
 
     def setRes(self,value):
         self.main_img_result.grid_forget()
@@ -61,7 +63,7 @@ class App(ctk.CTk):
             res = detector.perform_detection(f_path)
             self.all_res[f_path] = res
             self.scrollbar_list.add_image(
-                self.setImage, os.path.basename(f_path), res)
+                self.setImage, f_path, res)
 
     def addToScrollbar(self):
         fi = self.file
