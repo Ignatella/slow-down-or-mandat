@@ -15,7 +15,6 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 
-
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -26,7 +25,7 @@ class App(ctk.CTk):
         self.current = 0
         self.size = (400, 300)
 
-    def setImage(self, path):
+    def set_image(self, path):
         im = Image.open(path)
         im.thumbnail(self.size, Image.Resampling.LANCZOS)
         self.img = ctk.CTkImage(im, size=im.size)
@@ -34,28 +33,27 @@ class App(ctk.CTk):
             self.main_img.grid_forget()
         self.main_img = ctk.CTkLabel(self, text=None, image=self.img)
         self.main_img.grid(row=1, column=1)
-        self.setRes(self.all_res.get(path,""))
+        self.set_res(self.all_res.get(path, ""))
 
-
-    def setRes(self,value):
+    def set_res(self, value):
         self.main_img_result.grid_forget()
         self.main_img_result = ctk.CTkLabel(self, text=value)
         self.main_img_result.grid(row=2, column=1)
 
-    def openfile(self):
+    def load_file(self):
         self.main_img.grid_forget()
-        self.file = filedialog.askopenfilename(title="Open file", filetypes=[
+        self.file = filedialog.askopenfilename(title="Open file", initialdir=os.getcwd(), filetypes=[
             ("PNG files", "*.png"),
             ("JPG files", "*.jpg")])
         try:
-            self.setImage(self.file)
+            self.set_image(self.file)
         except Exception as e:
             if len(self.file) != 0:
                 messagebox.showerror(
                     "Error", "An error has occured while opening the file")
 
-    def loadfilesfromdir(self):
-        dir = filedialog.askdirectory()
+    def load_files_from_dir(self):
+        dir = filedialog.askdirectory(initialdir=os.getcwd())
         fi = filter(lambda f: f.endswith(("png", "jpg")), os.listdir(dir))
         for f in fi:
             f_path = f'{dir}/{f}'
@@ -63,9 +61,9 @@ class App(ctk.CTk):
             res = detector.perform_detection(f_path)
             self.all_res[f_path] = res
             self.scrollbar_list.add_image(
-                self.setImage, f_path, res)
+                self.set_image, f_path, res)
 
-    def addToScrollbar(self):
+    def add_to_scrollbar(self):
         fi = self.file
         try:
             if fi not in self.all_images:
@@ -73,13 +71,13 @@ class App(ctk.CTk):
                 self.all_images.append(fi)
                 self.all_res[fi] = res
                 self.scrollbar_list.add_image(
-                    self.setImage, fi, res)
-                self.setRes(res)
+                    self.set_image, fi, res)
+                self.set_res(res)
         except:
             messagebox.showerror(
                 "Error", "An error has occured while performing operation")
 
-    def removeFromScrollbar(self):
+    def remove_from_scrollbar(self):
         self.all_images = []
         self.all_res = {}
 
@@ -92,25 +90,25 @@ class App(ctk.CTk):
         self.main_img = ctk.CTkLabel(self, text="Main image")
         self.main_img.grid(row=1, column=1)
 
-        self.setRes("")
+        self.set_res("")
 
-    def arrowClick(self, mode):
+    def arrow_click(self, mode):
         if len(self.all_images) > 0:
             if mode == "L":
                 self.current -= 1
                 if self.current < 0:
-                    self.current = len(self.all_images)-1
+                    self.current = len(self.all_images) - 1
             elif mode == "R":
                 self.current += 1
                 if self.current >= len(self.all_images):
                     self.current = 0
-            self.setImage(self.all_images[self.current])
-            self.setRes(self.all_res[self.all_images[self.current]])
+            self.set_image(self.all_images[self.current])
+            self.set_res(self.all_res[self.all_images[self.current]])
         else:
             messagebox.showerror("Error", "No images loaded")
 
     def export_to_csv(self):
-        filename = filedialog.asksaveasfilename(filetypes=[("Plik csv", "*.csv")], defaultextension = "*.csv")
+        filename = filedialog.asksaveasfilename(filetypes=[("Plik csv", "*.csv")], defaultextension="*.csv")
         if filename:
             with open(filename, "w", newline="") as file:
                 writer = csv.writer(file)

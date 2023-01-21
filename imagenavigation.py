@@ -10,10 +10,10 @@ class ImageNavigation(ctk.CTkFrame):
         self.left_arrow_image = ctk.CTkImage(light_image=Image.open(
             "./assets/icons8-less-than-48.png"), dark_image=Image.open("./assets/icons8-less-than-dark-mode-48.png"), size=(30, 30))
         self.left_arrow_button = ctk.CTkButton(self, corner_radius=0, width=30, height=30, border_spacing=10, text=None,
-                                               fg_color="transparent", image=self.left_arrow_image, anchor="w", command=lambda: root.arrowClick("L"))
+                                               fg_color="transparent", image=self.left_arrow_image, anchor="w", command=lambda: root.arrow_click("L"))
         self.left_arrow_button.grid(row=0, column=0, padx=20)
         self.right_arrow_image = ctk.CTkImage(light_image=Image.open(
             "./assets/icons8-more-than-48.png"), dark_image=Image.open("./assets/icons8-more-than-dark-mode-48.png"), size=(30, 30))
         self.right_arrow_button = ctk.CTkButton(self, corner_radius=0, width=30, height=30, border_spacing=10, text=None,
-                                                fg_color="transparent", image=self.right_arrow_image, anchor="w", command=lambda: root.arrowClick("R"))
+                                                fg_color="transparent", image=self.right_arrow_image, anchor="w", command=lambda: root.arrow_click("R"))
         self.right_arrow_button.grid(row=0, column=2, padx=20)
