@@ -33,7 +33,7 @@ class App(ctk.CTk):
             self.main_img.grid_forget()
         self.main_img = ctk.CTkLabel(self, text=None, image=self.img)
         self.main_img.grid(row=1, column=1)
-        self.setRes(self.all_res[path])
+        self.setRes(self.all_res.get(path,""))
 
 
     def setRes(self,value):
