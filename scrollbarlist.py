@@ -1,5 +1,5 @@
-import tkinter as tk
 import customtkinter as ctk
+import os
 
 
 class ScrollbarList(ctk.CTkFrame):
@@ -34,7 +34,7 @@ class ScrollbarList(ctk.CTkFrame):
         #                   fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30")).pack(fill="both")
 
     def add_image(self, setImage, image, res=""):
-        self.images_list.append(ctk.CTkButton(self.inner_frame, corner_radius=0, border_spacing=5, text=f'{image} {res}',
+        self.images_list.append(ctk.CTkButton(self.inner_frame, corner_radius=0, border_spacing=5, text=f'{os.path.basename(image)} {res}',
                                               fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"), command=lambda: setImage(image)))
         self.images_list[-1].pack(fill="both")
 

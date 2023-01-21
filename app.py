@@ -71,7 +71,7 @@ class App(ctk.CTk):
                 self.all_images.append(fi)
                 self.all_res[fi] = res
                 self.scrollbar_list.add_image(
-                    self.setImage, os.path.basename(fi), res)
+                    self.setImage, fi, res)
                 self.setRes(res)
         except:
             messagebox.showerror(
