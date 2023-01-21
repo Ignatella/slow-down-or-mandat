@@ -1,120 +1,152 @@
-from tkinter import *
-from tkinter import filedialog
-from tkinter import messagebox
-from PIL import ImageTk, Image
-
+import tkinter as tk
+import customtkinter as ctk
 import os
-import webbrowser
+
 import detector
 
-import mymenu as mn
-import myframe as mf
-import buttonsmenu as btm
-import myscrollableview as msv
+from tkinter import filedialog
+from tkinter import messagebox
+from PIL import Image, ImageTk
+from menu import Menu
+from scrollbarlist import ScrollbarList
+from imagenavigation import ImageNavigation
+import csv
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
 
-class App:
+class App(ctk.CTk):
     def __init__(self):
-        self.root = Tk()
-        self.root.title("Slow down or mandat - AO")
-        self.root.geometry("800x600")
-        self.root.config(bg="white")
-        self.allImages = []
-        self.allRes = []
+        super().__init__()
+        self.title("Slow down or mandat - AO")
+        self.geometry(f"{800}x{600}")
+        self.all_images = []
+        self.all_res = {}
         self.current = 0
         self.size = (400, 300)
 
-    def donothing(self):
-        pass
+    def setImage(self, path):
+        im = Image.open(path)
+        im.thumbnail(self.size, Image.Resampling.LANCZOS)
+        self.img = ctk.CTkImage(im, size=im.size)
+        if self.main_img:
+            self.main_img.grid_forget()
+        self.main_img = ctk.CTkLabel(self, text=None, image=self.img)
+        self.main_img.grid(row=1, column=1)
+
+    def setRes(self,value):
+        self.main_img_result.grid_forget()
+        self.main_img_result = ctk.CTkLabel(self, text=value)
+        self.main_img_result.grid(row=2, column=1)
 
     def openfile(self):
-        self.mainImg.grid_forget()
+        self.main_img.grid_forget()
         self.file = filedialog.askopenfilename(title="Open file", filetypes=[
             ("PNG files", "*.png"),
             ("JPG files", "*.jpg")])
         try:
-            im = Image.open(self.file)
-            im.thumbnail(self.size, Image.Resampling.LANCZOS)
-            self.img = ImageTk.PhotoImage(im)
-            self.mainImg = Label(self.mff, image=self.img, bg="white")
-            self.mainImg.grid(row=0, column=0)
-        except:
-            messagebox.showerror(
-                "Error", "An error has occured while opening the file")
+            self.setImage(self.file)
+        except Exception as e:
+            if len(self.file) != 0:
+                messagebox.showerror(
+                    "Error", "An error has occured while opening the file")
 
     def loadfilesfromdir(self):
         dir = filedialog.askdirectory()
         fi = filter(lambda f: f.endswith(("png", "jpg")), os.listdir(dir))
         for f in fi:
-            self.addToScrollable(f'{dir}/{f}')
+            f_path = f'{dir}/{f}'
+            self.all_images.append(f_path)
+            res = detector.perform_detection(f_path)
+            self.all_res[f_path] = res
+            self.scrollbar_list.add_image(
+                self.setImage, os.path.basename(f_path), res)
 
-    def addToScrollable(self, fi=""):
-        # try:
-        if fi != "":
-            self.allImages.append(fi)
-            res = detector.perform_detection(fi)
-            self.allRes.append(res)
-        else:
-            self.allImages.append(self.file)
-            res = detector.perform_detection(self.file)
-            self.allRes.append(res)
-        self.msview = msv.MyScrollableView(self.lff)
-        self.msview.showimages(self.allImages, self.allRes)
-        self.msview.display(0, 0)
-        # except:
-        #     messagebox.showerror(
-        #         "Error", "An error has occured while performing operation")
+    def addToScrollbar(self):
+        fi = self.file
+        try:
+            if fi not in self.all_images:
+                res = detector.perform_detection(fi)
+                self.all_images.append(fi)
+                self.all_res[fi] = res
+                self.scrollbar_list.add_image(
+                    self.setImage, fi, res)
+                self.setRes(res)
+        except:
+            messagebox.showerror(
+                "Error", "An error has occured while performing operation")
+
+    def removeFromScrollbar(self):
+        self.all_images = []
+        self.all_res = {}
+
+        self.scrollbar_list.grid_forget()
+        self.scrollbar_list = ScrollbarList(self, width=20)
+        self.scrollbar_list.grid(
+            row=0, column=2, rowspan=3, sticky="nwse")
+
+        self.main_img.grid_forget()
+        self.main_img = ctk.CTkLabel(self, text="Main image")
+        self.main_img.grid(row=1, column=1)
+
+        self.setRes("")
 
     def arrowClick(self, mode):
-        if len(self.allImages) > 0:
+        if len(self.all_images) > 0:
             if mode == "L":
                 self.current -= 1
                 if self.current < 0:
-                    self.current = len(self.allImages)-1
+                    self.current = len(self.all_images)-1
             elif mode == "R":
                 self.current += 1
-                if self.current >= len(self.allImages):
+                if self.current >= len(self.all_images):
                     self.current = 0
-            im = Image.open(self.allImages[self.current])
-            im.thumbnail(self.size, Image.Resampling.LANCZOS)
-            self.img = ImageTk.PhotoImage(im)
-            self.mainImg = Label(self.mff, image=self.img, bg="white")
-            self.mainImg.grid(row=0, column=0)
+            self.setImage(self.all_images[self.current])
+            self.setRes(self.all_res[self.all_images[self.current]])
         else:
             messagebox.showerror("Error", "No images loaded")
 
+    def export_to_csv(self):
+        filename = filedialog.asksaveasfilename(filetypes=[("Plik csv", "*.csv")], defaultextension = "*.csv")
+        if filename:
+            with open(filename, "w", newline="") as file:
+                writer = csv.writer(file)
+                header = ("image", "result")
+                writer.writerow(header)
+                for row in self.all_res.items():
+                    writer.writerow(row)
+
     def draw(self):
-        m = mn.MyMenu(self.root)
-        m.submenu("File", ["Open file", "Export to CSV", "Load from directory"], [
-                  self.openfile, self.donothing, self.loadfilesfromdir])
-        m.submenu("Info", ["About", "Help"], [lambda: messagebox.showinfo(
-            "Authors", "Ignacy\nKacper\nPiotr"), lambda: webbrowser.open("https://github.com/Ignatella/slow-down-or-mandat#readme")])
+        # grid layout settings
+        self.grid_columnconfigure(1, weight=7)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
 
-        buttonsFrame = mf.MyFrame(self.root)
-        self.frm = buttonsFrame.createframe()
-        btnmenu = btm.ButtonsMenu(self.frm)
-        btnmenu.createbuttonsmenu(
-            ["./assets/icons8-less-than-48.png", "./assets/icons8-more-than-48.png", "./assets/icons8-open-document-48.png", "./assets/icons8-export-csv-48.png", "./assets/icons8-licence-plate-48.png", "./assets/icons8-numbers-input-form-48.png"], [lambda:self.arrowClick("L"), lambda:self.arrowClick("R"), self.openfile, lambda: print("CSV export"), self.addToScrollable, self.loadfilesfromdir])
-        buttonsFrame.display(0, 0, columnspan=2)
+        # menu
+        self.menu = Menu(self, width=140)
+        self.menu.grid(row=0, column=0, rowspan=4, sticky="nwse")
 
-        mainFrame = mf.MyFrame(self.root)
-        self.mff = mainFrame.createframe()
-        self.mainImg = Label(
-            self.mff, text="Main image", bg="white")
-        self.mainImg.grid(row=0, column=0)
-        mainFrame.display(2, 1, columnspan=2)
+        # main image
+        self.main_img = ctk.CTkLabel(self, text="Main image")
+        self.main_img.grid(row=1, column=1)
 
-        leftFrame = mf.MyFrame(self.root)
-        self.lff = leftFrame.createframe()
-        msview = msv.MyScrollableView(self.lff)
-        msview.showimages(self.allImages, self.allRes)
-        msview.display(0, 0)
-        leftFrame.display(2, 0, columnspan=1)
-        m.configroot()
-        self.root.grid_columnconfigure(4, weight=1)
-        self.root.mainloop()
+        self.main_img_result = ctk.CTkLabel(self, text="")
+        self.main_img_result.grid(row=2, column=1)
+
+        self.image_navigation = ImageNavigation(
+            self, self, fg_color="transparent")
+        self.image_navigation.grid(row=3, column=1)
+
+        # scrollbar list
+        self.scrollbar_list = ScrollbarList(self, width=20)
+        self.scrollbar_list.grid(
+            row=0, column=2, rowspan=3, sticky="nwse")
+
+        # start event loop
+        self.mainloop()
 
 
-a = App()
-
-a.draw()
+if __name__ == "__main__":
+    app = App()
+    app.draw()
