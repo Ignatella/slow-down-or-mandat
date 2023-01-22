@@ -9,13 +9,21 @@
 
 Założeniem projektu było stworzenie aplikacji rozpoznającej samochodowe tablice rejestracyjne. Do powstania programu wykorzystaliśmy język Python wraz z zależnościami określonymi w pliku requirements.txt. Naszym celem było wykorzystanie operacji na obrazach, w maksymalnym stopniu bazując na rozwiązaniach wykorzystujących różne operacje morfologiczne oraz przekształcenia poznane na zajęciach.
 
-#### Sposób uruchomienia
+### Sposób uruchomienia
 
-Po sklonowaniu repozytorium znajdującego się się pod tym adresem ([GitHub - Ignatella/slow-down-or-mandat](https://github.com/Ignatella/slow-down-or-mandat)), należy wykonać poniższe komendy (w systemie Linux):
+Po sklonowaniu repozytorium znajdującego się się pod tym adresem ([GitHub - Ignatella/slow-down-or-mandat](https://github.com/Ignatella/slow-down-or-mandat)), należy wykonać poniższe komendy:
+
+#### Linux
 
 ```plaintext
 sudo apt install tesseract-ocr python3-tk
 ```
+#### Windows
+
+```plaintext
+winget install UB-Mannheim.TesseractOCR
+```
+Domyślnie winget instaluje tesseracta w `C:\Program Files\Tesseract-OCR`, którego trzeba dodać do PATH.
 
 A następnie zainstalować zależności wykorzystywane bezpośrednio przez projekt i notebook jupyterowy:
 
